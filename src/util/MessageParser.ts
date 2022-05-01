@@ -50,11 +50,12 @@ function MessageParser(conn: conn, m: WAMessage, options: ParserOptions = {}): P
                 parsed.quoted.isBaileys = parsed.quoted.id ? parsed.quoted.id.startsWith('3EB0') && parsed.quoted.id.length === 12 : false
                 parsed.quoted.sender = parsed.msg.contextInfo?.participant || ''
                 parsed.quoted.fromMe = parsed.quoted.sender === (conn.user && conn.user.id)
+                parsed.quoted.msg = quoted
                 if (typeof quoted !== 'string')
                     parsed.quoted.text = q.text || q.caption || ''
                 else parsed.quoted.text = q
-                if ('contextInfo' in parsed.msg)
-                    parsed.quoted.mentionedJid = quoted.contextInfo?.mentionedJid || []
+                if (typeof parsed.quoted.msg === 'object' && 'contextInfo' in parsed.quoted.msg)
+                    parsed.quoted.mentionedJid = parsed.quoted.msg.contextInfo?.mentionedJid || []
                 if (loadMessage) parsed.getQuotedObj = parsed.getQuotedMessage = () => {
                     if (parsed.quoted.id) return loadMessage(parsed.chat, parsed.quoted.id)
                 }
