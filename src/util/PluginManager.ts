@@ -40,18 +40,18 @@ export class PluginManager {
                 if (dir in require.cache) {
                     delete require.cache[dir]
                     if (existsSync(dir)) {
-                        this.logger.info(`re - require plugin '${filename}'`)
+                        this.logger.info(`re - require plugin '${filename}' in ${folder}`)
                         await this.addPlugin(dir)
                     } else {
-                        this.logger.info(`deleted plugin '${filename}'`)
+                        this.logger.info(`deleted plugin '${filename}' in ${folder}`)
                         return await this.delPlugin(dir)
                     }
-                } else this.logger.info(`requiring new plugin '${filename}'`)
+                } else this.logger.info(`requiring new plugin '${filename}' in ${folder}`)
                 let err = false// syntaxerror(readFileSync(dir), filename)
-                if (err) this.logger.error(`syntax error while loading '${filename}'\n${err}`)
+                if (err) this.logger.error(`syntax error while loading '${filename}'\n${err} in ${folder}`)
                 else await this.addPlugin(dir)
             } catch (e) {
-                this.logger.error(`failed to add '${filename}'`, e)
+                this.logger.error(`failed to add '${filename}' in ${folder}`, e)
             }
         })
 

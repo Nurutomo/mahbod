@@ -1,9 +1,10 @@
 import { WAMessage } from "@adiwajshing/baileys"
-import { MessageTypes, ParsedMessage, ParserOptions, conn } from '../types'
+import { MessageTypes, ParsedMessage, ParserOptions, AnyWASocket } from '../types'
 
-function MessageParser(conn: conn, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
+function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
     let {
-        loadMessage
+        loadMessage,
+        sendMessage
     } = options
 
     // Basic Parse
@@ -15,7 +16,7 @@ function MessageParser(conn: conn, m: WAMessage, options: ParserOptions = {}): P
     }
     parsed.isBaileys = parsed.id.startsWith('3EB0') && parsed.id.length === 12
     parsed.isGroup = parsed.chat.endsWith('@g.us')
-    parsed.sender = parsed.fromMe ? conn.user.id : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat
+    parsed.sender = parsed.fromMe ? 'user' in conn ? conn.user.id : '' : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat
 
     // Content
     if (m.message) {
@@ -49,7 +50,7 @@ function MessageParser(conn: conn, m: WAMessage, options: ParserOptions = {}): P
                 parsed.quoted.chat = parsed.msg.contextInfo?.remoteJid || parsed.chat || ''
                 parsed.quoted.isBaileys = parsed.quoted.id ? parsed.quoted.id.startsWith('3EB0') && parsed.quoted.id.length === 12 : false
                 parsed.quoted.sender = parsed.msg.contextInfo?.participant || ''
-                parsed.quoted.fromMe = parsed.quoted.sender === (conn.user && conn.user.id)
+                parsed.quoted.fromMe = parsed.quoted.sender === ('user' in conn && conn.user.id)
                 parsed.quoted.msg = quoted
                 if (typeof quoted !== 'string')
                     parsed.quoted.text = q.text || q.caption || ''
@@ -59,9 +60,25 @@ function MessageParser(conn: conn, m: WAMessage, options: ParserOptions = {}): P
                 if (loadMessage) parsed.getQuotedObj = parsed.getQuotedMessage = () => {
                     if (parsed.quoted.id) return loadMessage(parsed.chat, parsed.quoted.id)
                 }
+                parsed.quoted.fakeObj = {
+                    key: {
+                      fromMe: parsed.quoted.fromMe,
+                      remoteJid: parsed.quoted.chat,
+                      id: parsed.quoted.id
+                    },
+                    message: q,
+                    ...(parsed.isGroup ? { participant: parsed.quoted.sender } : {})
+                  } as WAMessage
             }
         }
-        parsed.text = (typeof parsed.msg === 'object' ? (parsed.type === 'listResponseMessage' && 'singleSelectReply' in parsed.msg ? parsed.msg.singleSelectReply.selectedRowId : '') || ('text' in parsed.msg && parsed.msg.text) || ('caption' in parsed.msg && parsed.msg.caption) : parsed.msg) || ''
+        parsed.text = (typeof parsed.msg === 'object' ? (parsed.type === 'listResponseMessage' && 'singleSelectReply' in parsed.msg ? parsed.msg.singleSelectReply.selectedRowId : ('text' in parsed.msg && parsed.msg.text) || ('caption' in parsed.msg && parsed.msg.caption)) : parsed.msg) || ''
+    }
+
+    parsed.reply = (jid, content, options) => {
+        return sendMessage(jid, content, {
+            ...options,
+            quoted: m
+        })
     }
 
     return parsed

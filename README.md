@@ -8,6 +8,7 @@ TypeScript WhatsApp Bot built with [Baileys MD](https://github.com/adiwajshing/B
 
 Build
 ```sh
+npm install
 npm run build
 ```
 
@@ -15,6 +16,12 @@ Run
 ```sh
 npm start
 ```
+
+# TODO
+
+- [ ] Use as External Module
+- [ ] Permission
+- [ ] Database
 
 # Devs
 

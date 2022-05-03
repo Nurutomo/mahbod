@@ -2,7 +2,7 @@ import { MessageUpdateType, WAMessage } from "@adiwajshing/baileys";
 import MessageParser from "../util/MessageParser";
 import type Connection from "../util/Connection";
 import Plugins from "../util/PluginManager";
-import { onCommand } from "../types";
+import { LegacyWASocket, onCommand } from "../types";
 
 export default class Message {
     public static async onMessage({ sock, store }: Connection, _m: {
@@ -11,9 +11,14 @@ export default class Message {
     }) {
         let __m = _m.messages[0]
 
-        let m = MessageParser(sock, __m)
+        let m = MessageParser(sock, __m, {
+            loadMessage: (jid, id) => store.loadMessage(jid, id, sock as unknown as LegacyWASocket),
+            sendMessage: sock.sendMessage
+        })
 
-        console.log('<%s to %s> %s', m.sender, m.chat, m.text)
+        if (m.sender) console.log('<%s to %s> %s', m.sender, m.chat, m.text)
+        else console.log(m)
+        
         if (typeof m.text !== 'string') return
 
         let _err
@@ -43,6 +48,7 @@ export default class Message {
 
                 await plugin.onCommand({
                     m,
+                    _m,
                     sock,
                     text,
                     args,

@@ -2,10 +2,12 @@ import makeWASocket, { DisconnectReason, makeInMemoryStore, useSingleFileAuthSta
 import { Message } from '../listeners'
 import { join } from 'path'
 import pino from 'pino'
+import { AnyWASocket } from '../types'
+import { existsSync, readFileSync, unlinkSync } from 'fs'
 
 const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true } })
 export default class Connection {
-    sock: ReturnType<typeof makeWASocket>
+    sock: AnyWASocket
     store: ReturnType<typeof makeInMemoryStore>
     storePath: string
     name: string
@@ -25,23 +27,25 @@ export default class Connection {
 
 
     start() {
-        const { state, saveState } = useSingleFileAuthState(join(__dirname, `../../sessions/${this.name}.json`))
+        const sessionPath = join(__dirname, `../../sessions/${this.name}.json`)
+        try {
+            if (existsSync(sessionPath)) JSON.parse(readFileSync(sessionPath, 'utf8'))
+        } catch (e) {
+            console.error('Session data isn\'t valid')
+            console.error(e)
+            unlinkSync(sessionPath)
+        }
+        const { state, saveState } = useSingleFileAuthState(sessionPath)
 
         let store = this.store
-        this.sock = makeWASocket({
+        let sock = this.sock = makeWASocket({
             // can provide additional config here
             auth: state,
             logger: Logger.child({ class: this.name }),
             printQRInTerminal: true,
 
             getMessage(key) {
-                let r
-                for (let jid in store.messages) {
-                    let a = store.messages[jid].get(key.id)
-                    if (a) r = a
-                }
-                return r
-                return Promise.resolve(store.messages[key.remoteJid].get(key.id).message)
+                return store.loadMessage(key.remoteJid, key.id, sock).then(m => m.message)
             }
         })
 
