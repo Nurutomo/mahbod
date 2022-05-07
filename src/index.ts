@@ -1,4 +1,12 @@
 import Connection from "./util/Connection";
+import Plugins from "./util/PluginManager";
 
-var bot = new Connection
-bot.start()
+if (require.main === module) {
+  var bot = new Connection
+  bot.start()
+}
+
+export {
+  Connection,
+  Plugins
+}
