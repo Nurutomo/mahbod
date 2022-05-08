@@ -3,31 +3,38 @@ import { Message } from '../listeners'
 import { join } from 'path'
 import pino from 'pino'
 import { AnyWASocket } from '../types'
-import { existsSync, readFileSync, unlinkSync } from 'fs'
+import { existsSync, mkdirSync, PathLike, readFileSync, unlinkSync } from 'fs'
 
 const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true } })
 export default class Connection {
+    static isModule: boolean = true
+    
     sock: AnyWASocket
     store: ReturnType<typeof makeInMemoryStore>
-    storePath: string
+    storePath: PathLike
     name: string
+    storeFolder: PathLike
 
     constructor(name: string = 'session') {
         this.name = name
-
-        this.storePath = join(__dirname, `../../database/${this.name}.db.store.json`)
+        
+        this.storeFolder = Connection.isModule ? './database' : join(__dirname, '../../database')
+        if (!existsSync(this.storeFolder)) mkdirSync(this.storeFolder, { recursive: true })
+        this.storePath = join(this.storeFolder, `${this.name}.db.store.json`)
         this.store = makeInMemoryStore({})
         this.store.readFromFile(this.storePath)
 
         setInterval(() => {
-            this.store.writeToFile(this.storePath)
+            this.store.writeToFile(this.storePath.toString())
         }, 10_000)
     }
 
 
 
     start() {
-        const sessionPath = join(__dirname, `../../sessions/${this.name}.json`)
+        const sessionFolder = Connection.isModule ? './sessions' : join(__dirname, '../../sesions')
+        if (!existsSync(sessionFolder)) mkdirSync(sessionFolder, { recursive: true })
+        const sessionPath = join(sessionFolder, `${this.name}.json`)
         try {
             if (existsSync(sessionPath)) JSON.parse(readFileSync(sessionPath, 'utf8'))
         } catch (e) {

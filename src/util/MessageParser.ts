@@ -68,7 +68,13 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                     },
                     message: q,
                     ...(parsed.isGroup ? { participant: parsed.quoted.sender } : {})
-                  } as WAMessage
+                } as WAMessage
+                parsed.quoted.reply = (jid, content, options) => {
+                    return sendMessage(jid, content, {
+                        ...options,
+                        quoted: parsed.quoted.fakeObj
+                    })
+                }
             }
         }
         parsed.text = (typeof parsed.msg === 'object' ? (parsed.type === 'listResponseMessage' && 'singleSelectReply' in parsed.msg ? parsed.msg.singleSelectReply.selectedRowId : ('text' in parsed.msg && parsed.msg.text) || ('caption' in parsed.msg && parsed.msg.caption)) : parsed.msg) || ''

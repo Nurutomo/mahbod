@@ -1,7 +1,14 @@
-import { onCommand } from "../types"
+import { onCommand,  } from "../types"
 import { format } from "util"
-export default class test {
-    command = ['>', '=>']
+import { PluginClass } from "../util/PluginManager"
+
+export default class test extends PluginClass {
+
+    constructor () {
+        super()
+        this.command = ['>', '=>'] as PluginClass['command']
+        this.permissions = 'host' as unknown as PluginClass["permissions"]
+    }
 
     async onCommand({
         m,
@@ -27,17 +34,8 @@ export default class test {
             }, m, sock, store)
         } catch (e) {
             _return = e
-            sock.sendMessage(m.chat, {
-                text: format(a.toString())
-            }, {
-                quoted: m.m
-            })
         } finally {
-            sock.sendMessage(m.chat, {
-                text: format(_return)
-            }, {
-                quoted: m.m
-            })
+            m.reply(m.chat, { text: format(_return) })
         }
     }
 }

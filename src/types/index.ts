@@ -7,6 +7,7 @@ export type CreateFunction<P extends any[], R> = (...P: P) => R
 export type MessageTypes = keyof WAProto.IMessage
 export type AnyWASocket = ReturnType<typeof makeMDSocket>
 export type LegacyWASocket = ReturnType<typeof makeLegacySocket>
+export type Permissions = 'host' | 'owner' | 'premium' | 'group' | 'private' | 'admin' | 'bot_admin'
 
 export interface onCommand {
     m?: ParsedMessage
@@ -14,7 +15,7 @@ export interface onCommand {
     text?: string
     args?: string[]
     _args?: string[]
-    store: ReturnType<typeof makeInMemoryStore>
+    store?: ReturnType<typeof makeInMemoryStore>
     command?: string
 }
 

@@ -22,7 +22,7 @@ export class PluginManager {
 
     addPluginFolder(folder) {
         if (!existsSync(folder)) return
-        
+
         let resolved = resolve(folder)
         console.log(resolved)
         if (resolved in this.watcher) return
@@ -76,18 +76,18 @@ export class PluginManager {
             let fn = 'prototype' in source ? new source : source
             this.plugins[this.fn_id++] = fn
         } else {
-        if (!source.endsWith('.js')) return typeof cb === 'function' ? cb(true) : Promise.reject()
-        let pathToFile = resolve(source)
-        return Promise.resolve(import(source.replace('.js', '')))
-            .then(plugin => {
-                let module = 'default' in plugin ? plugin.default : plugin
-                return 'prototype' in module ? new module : module
-            })
-            .then(plugin => {
-                this.plugins[pathToFile] = plugin
-                if (typeof cb === 'function') cb(false, plugin)
-                return plugin
-            })
+            if (!source.endsWith('.js')) return typeof cb === 'function' ? cb(true) : Promise.reject()
+            let pathToFile = resolve(source)
+            return Promise.resolve(import(source.replace('.js', '')))
+                .then(plugin => {
+                    let module = 'default' in plugin ? plugin.default : plugin
+                    return 'prototype' in module ? new module : module
+                })
+                .then(plugin => {
+                    this.plugins[pathToFile] = plugin
+                    if (typeof cb === 'function') cb(false, plugin)
+                    return plugin
+                })
         }
     }
 
@@ -96,6 +96,11 @@ export class PluginManager {
         delete this.plugins[file]
         delete this.plugins[pathToFile]
     }
+}
+
+export class PluginClass {
+    command: string | RegExp | (string | RegExp)[]
+    permissions?: Permissions | Permissions[] = []
 }
 
 const Plugins = new PluginManager
