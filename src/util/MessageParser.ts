@@ -1,12 +1,16 @@
 import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto } from "@adiwajshing/baileys"
 import { ParsedMessage, ParserOptions, AnyWASocket } from '../types'
 
+export function normalizeUserId(jid: string) {
+    return jid.split('@').map(a => a.split(':')[0]).join('@') // added normalizer
+}
+
 function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
     const {
         loadMessage,
         sendMessage
     } = options
-    const userJid = conn.authState.creds.me!.id
+    const userJid = normalizeUserId(conn.authState.creds.me!.id)
 
     // Basic Parse
     let parsed: ParsedMessage = {
@@ -19,7 +23,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
     else if (parsed.id.startsWith('BAE5') && parsed.id.length === 16) parsed.sentSource = 'baileys'
     else parsed.sentSource = getDevice(parsed.id)
     parsed.isGroup = parsed.chat.endsWith('@g.us')
-    parsed.sender = parsed.fromMe ? userJid : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat
+    parsed.sender = normalizeUserId(parsed.fromMe ? userJid : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat)
 
     // Content
     if (m.message) {
@@ -40,7 +44,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                         type,
                         id: parsed.msg.contextInfo?.stanzaId || '',
                         chat: parsed.msg.contextInfo?.remoteJid || parsed.chat || '',
-                        sender: parsed.msg.contextInfo?.participant || ''
+                        sender: normalizeUserId(parsed.msg.contextInfo?.participant || '')
                     }
                     if (parsed.quoted.id.startsWith('3EB0') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'old_baileys'
                     else if (parsed.quoted.id.startsWith('BAE5') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'baileys'
