@@ -16,7 +16,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
         fromMe: m.key?.fromMe || false
     }
     if (parsed.id.startsWith('3EB0') && parsed.id.length === 12) parsed.sentSource = 'old_baileys'
-    else if (parsed.id.startsWith('BAE5') && parsed.id.length === 12) parsed.sentSource = 'baileys'
+    else if (parsed.id.startsWith('BAE5') && parsed.id.length === 16) parsed.sentSource = 'baileys'
     else parsed.sentSource = getDevice(parsed.id)
     parsed.isGroup = parsed.chat.endsWith('@g.us')
     parsed.sender = parsed.fromMe ? userJid : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat
