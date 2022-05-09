@@ -15,7 +15,8 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
         chat: m.key?.remoteJid || '',
         fromMe: m.key?.fromMe || false
     }
-    if (parsed.id.startsWith('3EB0') && parsed.id.length === 12) parsed.sentSource = 'baileys'
+    if (parsed.id.startsWith('3EB0') && parsed.id.length === 12) parsed.sentSource = 'old_baileys'
+    else if (parsed.id.startsWith('BAE5') && parsed.id.length === 12) parsed.sentSource = 'baileys'
     else parsed.sentSource = getDevice(parsed.id)
     parsed.isGroup = parsed.chat.endsWith('@g.us')
     parsed.sender = parsed.fromMe ? userJid : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat
@@ -41,7 +42,8 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                         chat: parsed.msg.contextInfo?.remoteJid || parsed.chat || '',
                         sender: parsed.msg.contextInfo?.participant || ''
                     }
-                    if (parsed.quoted.id.startsWith('3EB0') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'baileys'
+                    if (parsed.quoted.id.startsWith('3EB0') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'old_baileys'
+                    else if (parsed.quoted.id.startsWith('BAE5') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'baileys'
                     else parsed.quoted.sentSource = getDevice(parsed.quoted.id)
                     parsed.quoted.fromMe = parsed.quoted.sender === userJid
                     parsed.quoted.msg = quoted

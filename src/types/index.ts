@@ -32,7 +32,7 @@ export interface onCommand {
 export interface ParsedMessage {
     m: WAMessage
     id?: WAMessage['key']['id']
-    sentSource?: ReturnType<typeof getDevice> | 'baileys'
+    sentSource?: ReturnType<typeof getDevice> | 'baileys' | 'old_baileys'
     chat?: WAMessage['key']['remoteJid']
     fromMe?: WAMessage['key']['fromMe']
     isGroup?: Boolean
