@@ -52,7 +52,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                         ('text' in parsed.msg && parsed.msg.text)
                         || ('caption' in parsed.msg && parsed.msg.caption)
                         : parsed.msg
-                    if (typeof parsed.quoted.msg === 'object' && 'contextInfo' in parsed.quoted.msg)
+                    if (parsed.quoted.msg && typeof parsed.quoted.msg === 'object' && 'contextInfo' in parsed.quoted.msg)
                         parsed.quoted.mentionedJid = parsed.quoted.msg.contextInfo?.mentionedJid || []
                     if (loadMessage) parsed.getQuotedObj = parsed.getQuotedMessage = () => {
                         if (parsed.quoted.id) return loadMessage(parsed.chat, parsed.quoted.id)
