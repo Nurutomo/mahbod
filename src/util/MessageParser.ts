@@ -54,9 +54,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                         : parsed.msg
                     if (parsed.quoted.msg && typeof parsed.quoted.msg === 'object' && 'contextInfo' in parsed.quoted.msg)
                         parsed.quoted.mentionedJid = parsed.quoted.msg.contextInfo?.mentionedJid || []
-                    if (loadMessage) parsed.getQuotedObj = parsed.getQuotedMessage = () => {
-                        if (parsed.quoted.id) return loadMessage(parsed.chat, parsed.quoted.id)
-                    }
+                    if (loadMessage && parsed.quoted.id) parsed.getQuotedObj = parsed.getQuotedMessage = () => loadMessage(parsed.chat, parsed.quoted.id)
                     parsed.quoted.fakeObj = {
                         key: {
                             fromMe: parsed.quoted.fromMe,
