@@ -4,6 +4,7 @@ import { join } from 'path'
 import pino from 'pino'
 import { AnyWASocket } from '../types'
 import { existsSync, mkdirSync, PathLike, readFileSync, unlinkSync } from 'fs'
+import Helper from './Helper'
 
 const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true } })
 export default class Connection {
@@ -14,6 +15,8 @@ export default class Connection {
     storePath: PathLike
     name: string
     storeFolder: PathLike
+    hosts: string[] = []
+    owners: string[] = []
 
     constructor(name: string = 'session') {
         this.name = name
@@ -55,6 +58,8 @@ export default class Connection {
                 return store.loadMessage(key.remoteJid, key.id, sock).then(m => m.message)
             }
         })
+
+        Helper(sock)
 
         this.store.bind(this.sock.ev)
 

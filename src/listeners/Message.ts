@@ -44,7 +44,7 @@ export default class Message {
                             plugin.command === command :
                             false
 
-                if (!isCommand || m.isBaileys) continue
+                if (!isCommand || m.sentSource === 'baileys') continue
 
                 await plugin.onCommand({
                     m,

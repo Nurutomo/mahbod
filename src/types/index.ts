@@ -1,13 +1,23 @@
-import { makeInMemoryStore, WAMessage, WAProto } from "@adiwajshing/baileys";
+import { makeInMemoryStore, WAMessage, WAProto, getDevice, downloadMediaMessage, AnyMessageContent, MiscMessageGenerationOptions } from "@adiwajshing/baileys";
 import makeLegacySocket from "@adiwajshing/baileys/lib/LegacySocket";
 import makeMDSocket from "@adiwajshing/baileys/lib/Socket";
 
-export type CreateFunction<P extends any[], R> = (...P: P) => R
+export type CreateFunction<T extends any[], R> = (...arg: T) => R
+export type ExcludeFromTuple<T extends readonly any[], E> =
+    T extends [infer F, ...infer R] ? [F] extends [E] ? ExcludeFromTuple<R, E> :
+    [F, ...ExcludeFromTuple<R, E>] : []
+
+export type First<T extends any[]> = T extends [infer I, ...infer _L] ? I : never
+export type Last<T extends any[]> = T extends [...infer _I, infer L] ? L : never
+// always never
+// export type Head<T extends any[]> = T extends [...infer I, infer _L] ? I : never
+export type Tail<T extends any[]> = T extends [infer _I, ...infer L] ? L : never
+type BAC<T extends any[]> = [First<Tail<T>>, First<T>, ...Tail<Tail<T>>]
 
 export type MessageTypes = keyof WAProto.IMessage
 export type AnyWASocket = ReturnType<typeof makeMDSocket>
 export type LegacyWASocket = ReturnType<typeof makeLegacySocket>
-export type Permissions = 'host' | 'owner' | 'premium' | 'group' | 'private' | 'admin' | 'bot_admin'
+export type Permissions = 'host' | 'owner' | 'group' | 'private' | 'admin' | 'bot_admin'
 
 export interface onCommand {
     m?: ParsedMessage
@@ -22,7 +32,7 @@ export interface onCommand {
 export interface ParsedMessage {
     m: WAMessage
     id?: WAMessage['key']['id']
-    isBaileys?: Boolean
+    sentSource?: ReturnType<typeof getDevice> | 'baileys'
     chat?: WAMessage['key']['remoteJid']
     fromMe?: WAMessage['key']['fromMe']
     isGroup?: Boolean
@@ -34,10 +44,12 @@ export interface ParsedMessage {
     text?: string
     getQuotedObj?: () => ReturnType<ParserOptions['loadMessage']>
     getQuotedMessage?: () => ReturnType<ParserOptions['loadMessage']>
-    reply?: CreateFunction<Parameters<ParserOptions['sendMessage']>, ReturnType<ParserOptions['sendMessage']>>
+    reply?: (content: AnyMessageContent, jid?: string, options?: MiscMessageGenerationOptions) => ReturnType<ParserOptions['sendMessage']>
+    download?: CreateFunction<Tail<Parameters<typeof downloadMediaMessage>>, ReturnType<typeof downloadMediaMessage>>
 }
 
-export interface ParsedQuotedMessage extends Omit<ParsedMessage, 'quoted' | 'getQuotedObj' | 'getQuotedMessage'> {
+export interface ParsedQuotedMessage extends Omit<ParsedMessage, 'm' | 'quoted' | 'getQuotedObj' | 'getQuotedMessage'> {
+    m?: WAProto.IMessage
     fakeObj?: WAMessage
 }
 

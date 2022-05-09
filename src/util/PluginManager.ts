@@ -1,6 +1,7 @@
 import { join, resolve } from 'path'
 import { existsSync, FSWatcher, readdirSync, watch } from 'fs'
 import type { Logger } from 'pino'
+import { Permissions } from '../types'
 
 type Callback = (error?: Error | Boolean, message?: any) => any
 
@@ -75,6 +76,7 @@ export class PluginManager {
         if (typeof source === 'function' && 'prototype' in source) {
             let fn = 'prototype' in source ? new source : source
             this.plugins[this.fn_id++] = fn
+            return typeof cb === 'function' ? cb(false, fn) : Promise.resolve(fn)
         } else {
             if (!source.endsWith('.js')) return typeof cb === 'function' ? cb(true) : Promise.reject()
             let pathToFile = resolve(source)

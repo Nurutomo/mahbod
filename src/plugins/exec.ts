@@ -26,16 +26,12 @@ export default class test extends PluginClass {
             _return = await exec.call(sock, (...args) => {
                 if (--i < 1) return
                 console.log(...args)
-                return sock.sendMessage(m.chat, {
-                    text: format(...args)
-                }, {
-                    quoted: m.m
-                })
+                return m.reply({ text: format(...args) })
             }, m, sock, store)
         } catch (e) {
             _return = e
         } finally {
-            m.reply(m.chat, { text: format(_return) })
+            m.reply({ text: format(_return) })
         }
     }
 }
