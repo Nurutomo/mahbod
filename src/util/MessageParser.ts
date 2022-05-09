@@ -26,7 +26,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
         parsed.msg = extractMessageContent(m.message)[parsed.type]
         // Context Info
         if (typeof parsed.msg === 'object') {
-            if ('contextInfo' in parsed.msg) {
+            if (parsed.msg && 'contextInfo' in parsed.msg) {
                 const q: WAProto.IMessage | {} = parsed.msg.contextInfo ? parsed.msg.contextInfo.quotedMessage as WAMessage : {}
                 parsed.mentionedJid = parsed.msg.contextInfo ? parsed.msg.contextInfo.mentionedJid : []
 
