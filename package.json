@@ -6,29 +6,44 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "start": "node ./lib/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "tsc",
-    "build": "tsc"
+    "build:all": "tsc && typedoc",
+    "build:docs": "typedoc",
+    "build:tsc": "tsc",
+    "start": "node ./lib/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["whatsapp", "bot"],
-  "author": "Nurutomo",
-  "license": "ISC",
+  "keywords": [
+    "whatsapp",
+    "bot"
+  ],
+  "author": {
+    "name": "Nurutomo"
+  },
   "repository": {
-    "url": "git@github.com:nurutomo/mahbod.git"
+    "type": "git",
+    "url": "git+https://github.com/Nurutomo/mahbot.git"
   },
+  "bugs": {
+    "url": "https://github.com/Nurutomo/mahbot/issues"
+  },
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@adiwajshing/baileys": "github:adiwajshing/Baileys",
     "@adiwajshing/keyed-db": "^0.2.4",
+    "got": "^12.0.4",
     "link-preview-js": "^2.1.13",
+    "lowdb": "^3.0.0",
+    "mongoose": "^6.3.3",
     "pino": "^7.11.0",
     "pino-pretty": "^7.6.1",
     "qrcode-terminal": "^0.12.0"
   },
   "devDependencies": {
+    "@types/got": "^9.6.12",
     "@types/node": "^16.4.2",
     "@types/ws": "^8.5.3",
-    "ts-node": "^10.7.0",
+    "typedoc": "^0.22.15",
     "typescript": "^4.6.4"
   },
   "files": [

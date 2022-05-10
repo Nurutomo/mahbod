@@ -5,6 +5,8 @@ import pino from 'pino'
 import { AnyWASocket } from '../types'
 import { existsSync, mkdirSync, PathLike, readFileSync, unlinkSync } from 'fs'
 import Helper from './Helper'
+import db from './Database'
+import { JSONFile } from 'lowdb'
 
 const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true } })
 export default class Connection {
@@ -23,6 +25,7 @@ export default class Connection {
         
         this.storeFolder = Connection.isModule ? './database' : join(__dirname, '../../database')
         if (!existsSync(this.storeFolder)) mkdirSync(this.storeFolder, { recursive: true })
+        db.setAdapter(new JSONFile(join(this.storeFolder, `${this.name}.db.json`)))
         this.storePath = join(this.storeFolder, `${this.name}.db.store.json`)
         this.store = makeInMemoryStore({})
         this.store.readFromFile(this.storePath)
@@ -30,6 +33,10 @@ export default class Connection {
         setInterval(() => {
             this.store.writeToFile(this.storePath.toString())
         }, 10_000)
+
+        setInterval(() => {
+            db.low.write().catch(console.error)
+        }, 60000)
     }
 
 

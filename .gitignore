@@ -2,5 +2,6 @@ package-lock.json
 node_modules
 database
 sessions
+docs
 lib
 tmp
