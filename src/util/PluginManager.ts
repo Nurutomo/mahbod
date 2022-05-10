@@ -14,6 +14,7 @@ export class PluginManager {
         [x: string]: FSWatcher
     } = {}
     logger: Console | Logger = console
+    filter = /.js$/i
     private fn_id = 0
 
     constructor() {
@@ -37,6 +38,7 @@ export class PluginManager {
 
         let watcher = watch(resolved, async (_event, filename) => {
             try {
+                if (!this.filter.test(filename)) return
                 let dir = join(resolved, filename)
                 if (dir in require.cache) {
                     delete require.cache[dir]
@@ -78,7 +80,7 @@ export class PluginManager {
             this.plugins[this.fn_id++] = fn
             return typeof cb === 'function' ? cb(false, fn) : Promise.resolve(fn)
         } else {
-            if (!source.endsWith('.js')) return typeof cb === 'function' ? cb(true) : Promise.reject()
+            if (!this.filter.test(source)) return typeof cb === 'function' ? cb(true) : Promise.reject()
             let pathToFile = resolve(source)
             return Promise.resolve(import(source.replace('.js', '')))
                 .then(plugin => {

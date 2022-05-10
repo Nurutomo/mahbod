@@ -45,7 +45,7 @@ export interface ParsedMessage {
     getQuotedObj?: () => ReturnType<ParserOptions['loadMessage']>
     getQuotedMessage?: () => ReturnType<ParserOptions['loadMessage']>
     reply?: (content: AnyMessageContent, jid?: string, options?: MiscMessageGenerationOptions) => ReturnType<ParserOptions['sendMessage']>
-    download?: CreateFunction<Tail<Parameters<typeof downloadMediaMessage>>, ReturnType<typeof downloadMediaMessage>>
+    download?: CreateFunction<Partial<Tail<Parameters<typeof downloadMediaMessage>>>, ReturnType<typeof downloadMediaMessage>>
 }
 
 export interface ParsedQuotedMessage extends Omit<ParsedMessage, 'm' | 'quoted' | 'getQuotedObj' | 'getQuotedMessage'> {
