@@ -1,4 +1,4 @@
-import { Low, Adapter } from 'lowdb'
+import { Low, Adapter } from '../../lowdb'
 import CloudDBAdapter from './db_adapters/JSONCloud'
 import mongoDB from './db_adapters/MongoDB'
 

@@ -1,4 +1,4 @@
-import got, { OptionsOfTextResponseBody } from 'got'
+import fetch, { RequestInfo, RequestInit } from 'node-fetch'
 
 const stringify = obj => JSON.stringify(obj, null, 2)
 const parse = str => JSON.parse(str, (_, v) => {
@@ -15,12 +15,12 @@ const parse = str => JSON.parse(str, (_, v) => {
 })
 
 export default class CloudDBAdapter {
-    url: string | URL
+    url: RequestInfo
     serialize: (obj: Object) => string
     deserialize: (str: string) => {
         [x: string]: any
     }
-    fetchOptions: OptionsOfTextResponseBody
+    fetchOptions: RequestInit
 
     constructor(url, {
         serialize = stringify,
@@ -35,22 +35,22 @@ export default class CloudDBAdapter {
 
     async read() {
         try {
-            let res = await got(this.url, {
+            let res = await fetch(this.url, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json;q=0.9,text/plain'
                 },
                 ...this.fetchOptions
             })
-            if (res.statusCode !== 200) throw res.statusMessage
-            return this.deserialize(res.body)
+            if (res.status !== 200) throw res.statusText
+            return this.deserialize(await res.text())
         } catch (e) {
             return null
         }
     }
 
     async write(obj) {
-        let res = await got(this.url, {
+        let res = await fetch(this.url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ export default class CloudDBAdapter {
             ...this.fetchOptions,
             body: this.serialize(obj)
         })
-        if (res.statusCode !== 200) throw res.statusMessage
-        return res.body
+        if (res.status !== 200) throw res.statusText
+        return await res.text()
     }
 }

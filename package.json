@@ -32,17 +32,17 @@
   "dependencies": {
     "@adiwajshing/baileys": "github:adiwajshing/Baileys",
     "@adiwajshing/keyed-db": "^0.2.4",
-    "got": "^12.0.4",
     "link-preview-js": "^2.1.13",
-    "lowdb": "^3.0.0",
     "mongoose": "^6.3.3",
+    "node-fetch": "^2.6.7",
     "pino": "^7.11.0",
     "pino-pretty": "^7.6.1",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "steno": "^2.1.0"
   },
   "devDependencies": {
-    "@types/got": "^9.6.12",
     "@types/node": "^16.4.2",
+    "@types/node-fetch": "^2.6.1",
     "@types/ws": "^8.5.3",
     "typedoc": "^0.22.15",
     "typescript": "^4.6.4"
