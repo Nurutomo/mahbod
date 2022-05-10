@@ -1,16 +1,12 @@
-import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto } from "@adiwajshing/baileys"
+import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto, areJidsSameUser, isJidGroup } from "@adiwajshing/baileys"
 import { ParsedMessage, ParserOptions, AnyWASocket } from '../types'
-
-export function normalizeUserId(jid: string) {
-    return jid.split('@').map(a => a.split(':')[0]).join('@') // added normalizer
-}
 
 function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
     const {
         loadMessage,
         sendMessage
     } = options
-    const userJid = normalizeUserId(conn.authState.creds.me!.id)
+    const userJid = conn.authState.creds.me!.id
 
     // Basic Parse
     let parsed: ParsedMessage = {
@@ -22,8 +18,8 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
     if (parsed.id.startsWith('3EB0') && parsed.id.length === 12) parsed.sentSource = 'old_baileys'
     else if (parsed.id.startsWith('BAE5') && parsed.id.length === 16) parsed.sentSource = 'baileys'
     else parsed.sentSource = getDevice(parsed.id)
-    parsed.isGroup = parsed.chat.endsWith('@g.us')
-    parsed.sender = normalizeUserId(parsed.fromMe ? userJid : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat)
+    parsed.isGroup = isJidGroup(parsed.chat)
+    parsed.sender = parsed.fromMe ? userJid : m.participant ? m.participant : m.key?.participant ? m.key?.participant : parsed.chat
 
     // Content
     if (m.message) {
@@ -44,12 +40,13 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                         type,
                         id: parsed.msg.contextInfo?.stanzaId || '',
                         chat: parsed.msg.contextInfo?.remoteJid || parsed.chat || '',
-                        sender: normalizeUserId(parsed.msg.contextInfo?.participant || '')
+                        sender: parsed.msg.contextInfo?.participant
                     }
+                    parsed.isGroup = isJidGroup(parsed.quoted.chat)
                     if (parsed.quoted.id.startsWith('3EB0') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'old_baileys'
                     else if (parsed.quoted.id.startsWith('BAE5') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'baileys'
                     else parsed.quoted.sentSource = getDevice(parsed.quoted.id)
-                    parsed.quoted.fromMe = parsed.quoted.sender === userJid
+                    parsed.quoted.fromMe = areJidsSameUser(parsed.quoted.sender, userJid)
                     parsed.quoted.msg = quoted
                     typeof parsed.msg === 'object' ? 'listResponseMessage' && 'singleSelectReply' in parsed.msg ?
                         parsed.msg.singleSelectReply.selectedRowId :
