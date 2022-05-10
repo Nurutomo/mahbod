@@ -27,7 +27,9 @@ jobs:
       uses: actions/setup-node@v2.1.1
 
     - name: Install Dependencies
-      run: yarn
+      run: |
+        yarn
+        npm install
 
     - name: Build
       run: yarn run build:all
