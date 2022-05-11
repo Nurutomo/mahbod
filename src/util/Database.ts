@@ -1,4 +1,4 @@
-import { Low, Adapter } from '../../lowdb'
+import { Low, Adapter, Memory } from './lowdb'
 import CloudDBAdapter from './db_adapters/JSONCloud'
 import mongoDB from './db_adapters/MongoDB'
 
@@ -15,10 +15,7 @@ export class Database {
         this.adapters = {
             CloudDBAdapter, mongoDB
         }
-        this.low = new Low({
-            async read() {},
-            async write() {}
-        })
+        this.low = new Low(new Memory)
         this.data = this.low.data
     }
 

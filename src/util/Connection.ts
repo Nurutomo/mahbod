@@ -6,7 +6,7 @@ import { AnyWASocket } from '../types'
 import { existsSync, mkdirSync, PathLike, readFileSync, unlinkSync } from 'fs'
 import Helper from './Helper'
 import db from './Database'
-import { JSONFile } from '../../lowdb'
+import { JSONFile } from './lowdb'
 
 const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true } })
 export default class Connection {
