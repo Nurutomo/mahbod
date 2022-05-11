@@ -32,6 +32,7 @@
   "dependencies": {
     "@adiwajshing/baileys": "github:adiwajshing/Baileys",
     "@adiwajshing/keyed-db": "^0.2.4",
+    "@commonify/lowdb": "^3.0.0",
     "link-preview-js": "^2.1.13",
     "mongoose": "^6.3.3",
     "node-fetch": "^2.6.7",

@@ -1,4 +1,4 @@
-import { Low, Adapter, Memory } from './lowdb'
+import { Low, Adapter, Memory } from '@commonify/lowdb'
 import CloudDBAdapter from './db_adapters/JSONCloud'
 import mongoDB from './db_adapters/MongoDB'
 
