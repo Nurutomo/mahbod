@@ -17,6 +17,7 @@ type BAC<T extends any[]> = [First<Tail<T>>, First<T>, ...Tail<Tail<T>>]
 export type MessageTypes = keyof WAProto.IMessage
 export type AnyWASocket = ReturnType<typeof makeMDSocket>
 export type LegacyWASocket = ReturnType<typeof makeLegacySocket>
+export type WASocket = AnyWASocket | LegacyWASocket
 export type Permissions = 'host' | 'owner' | 'group' | 'private' | 'admin' | 'bot_admin'
 
 export interface onCommand {
@@ -42,13 +43,15 @@ export interface ParsedMessage {
     quoted?: ParsedQuotedMessage
     mentionedJid?: string[]
     text?: string
+    timestamp: Date
     getQuotedObj?: () => ReturnType<ParserOptions['loadMessage']>
     getQuotedMessage?: () => ReturnType<ParserOptions['loadMessage']>
     reply?: (content: AnyMessageContent, jid?: string, options?: MiscMessageGenerationOptions) => ReturnType<ParserOptions['sendMessage']>
     download?: CreateFunction<Partial<Tail<Parameters<typeof downloadMediaMessage>>>, ReturnType<typeof downloadMediaMessage>>
+    isCommand?: Boolean | Error
 }
 
-export interface ParsedQuotedMessage extends Omit<ParsedMessage, 'm' | 'quoted' | 'getQuotedObj' | 'getQuotedMessage'> {
+export interface ParsedQuotedMessage extends Omit<ParsedMessage, 'm' | 'quoted' | 'getQuotedObj' | 'getQuotedMessage' | 'timestamp'> {
     m?: WAProto.IMessage
     fakeObj?: WAMessage
 }

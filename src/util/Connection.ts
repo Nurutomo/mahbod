@@ -12,7 +12,7 @@ const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { level
 export default class Connection {
     static isModule: boolean = true
     
-    sock: AnyWASocket
+    sock: ReturnType<typeof Helper>
     store: ReturnType<typeof makeInMemoryStore>
     storePath: PathLike
     name: string
@@ -54,6 +54,7 @@ export default class Connection {
         }
         const { state, saveState } = useSingleFileAuthState(sessionPath)
 
+        let self = this
         let store = this.store
         let sock = this.sock = makeWASocket({
             // can provide additional config here
@@ -64,9 +65,9 @@ export default class Connection {
             getMessage(key) {
                 return store.loadMessage(key.remoteJid, key.id, sock).then(m => m.message)
             }
-        })
+        }) as ReturnType<typeof Helper>
 
-        Helper(sock)
+        sock = this.sock = Helper(this.sock, this.store)
 
         this.store.bind(this.sock.ev)
 
