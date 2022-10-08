@@ -1,4 +1,4 @@
-import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto, areJidsSameUser, isJidGroup } from "@adiwajshing/baileys"
+import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto, areJidsSameUser, isJidGroup } from '@adiwajshing/baileys'
 import { ParsedMessage, ParserOptions, AnyWASocket } from '../types'
 
 function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
@@ -46,7 +46,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                         }
                         parsed.isGroup = isJidGroup(parsed.quoted.chat)
                         if (parsed.quoted.id.startsWith('3EB0') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'old_baileys'
-                        else if (parsed.quoted.id.startsWith('BAE5') && parsed.quoted.id.length === 12) parsed.quoted.sentSource = 'baileys'
+                        else if (parsed.quoted.id.startsWith('BAE5') && parsed.quoted.id.length === 16) parsed.quoted.sentSource = 'baileys'
                         else parsed.quoted.sentSource = getDevice(parsed.quoted.id)
                         parsed.quoted.fromMe = areJidsSameUser(parsed.quoted.sender, userJid)
                         parsed.quoted.msg = quoted
@@ -68,7 +68,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                             ...(parsed.isGroup ? { participant: parsed.quoted.sender } : {})
                         } as WAMessage
                         parsed.quoted.reply = (content, jid = parsed.quoted.chat, options) => {
-                            return sendMessage(jid, content, {
+                            return sendMessage(jid, typeof content === 'string' ? { text: content } : content, {
                                 ...options,
                                 quoted: parsed.quoted.fakeObj
                             })
@@ -78,7 +78,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                         }
                     }
                 }
-                parsed.text = 'listResponseMessage' && 'singleSelectReply' in parsed.msg ?
+                parsed.text = 'singleSelectReply' in parsed.msg ?
                     parsed.msg.singleSelectReply.selectedRowId :
                     ('text' in parsed.msg && parsed.msg.text)
                     || ('caption' in parsed.msg && parsed.msg.caption)
@@ -89,7 +89,7 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
     }
 
     parsed.reply = (content, jid = parsed.chat, options?) => {
-        return sendMessage(jid, content, {
+        return sendMessage(jid, typeof content === 'string' ? { text: content } : content, {
             ...options,
             quoted: m
         })

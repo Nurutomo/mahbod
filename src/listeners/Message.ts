@@ -1,20 +1,19 @@
-import { MessageUpdateType, WAMessage } from "@adiwajshing/baileys";
-import MessageParser from "../util/MessageParser";
-import type Connection from "../util/Connection";
-import Plugins from "../util/PluginManager";
-import { LegacyWASocket, onCommand } from "../types";
-import Print from "../util/Print";
+import { MessageUpsertType, WAMessage } from '@adiwajshing/baileys'
+import MessageParser from '../util/MessageParser'
+import type Connection from '../util/Connection'
+import Plugins from '../util/PluginManager'
+import { onCommand } from '../types'
 
 export default class Message {
     public static async onMessage(conn: Connection, _m: {
-        messages: WAMessage[];
-        type: MessageUpdateType;
+        messages: WAMessage[]
+        type: MessageUpsertType
     }) {
         let { sock, store } = conn
         let __m = _m.messages[0]
 
         let m = MessageParser(sock, __m, {
-            loadMessage: (jid, id) => store.loadMessage(jid, id, sock as unknown as LegacyWASocket),
+            loadMessage: (jid, id) => store.loadMessage(jid, id),
             sendMessage: sock.sendMessage
         })
         try {
@@ -44,7 +43,8 @@ export default class Message {
                                 false
 
                     if (!isCommand || m.sentSource.endsWith('baileys')) continue
-
+                    if (!(await conn.permissionHandler(conn, m, plugin.permissions, name => m.reply({ text: `_Anda tidak memiliki izin untuk menggunakan fitur_ *${name.join()}*` })))) continue
+                    
                     await plugin.onCommand({
                         m,
                         _m,
@@ -54,6 +54,7 @@ export default class Message {
                         _args,
                         store,
                         command,
+                        conn
                     } as onCommand)
                     m.isCommand = true
                 } catch (e) {
@@ -65,7 +66,10 @@ export default class Message {
         } catch (e) {
 
         } finally {
-            if (m.sender) Print(m, conn)//console.log('<%s to %s> %s', m.sender, m.chat, m.text)
+            if (m.sender) conn.print(m, conn).catch(e => {
+                console.error(e)
+                console.log('<%s to %s> %s', m.sender, m.chat, m.text)
+            })
             else console.log(m)
         }
     }

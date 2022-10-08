@@ -1,4 +1,4 @@
-import { AnyMessageContent, generateWAMessageFromContent, MessageType, MiscMessageGenerationOptions, normalizeMessageContent, WAProto } from '@adiwajshing/baileys'
+import { AnyMessageContent, Chat, Contact, generateWAMessageFromContent, MessageType, MiscMessageGenerationOptions, normalizeMessageContent, WAProto } from '@adiwajshing/baileys'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import { AnyWASocket } from '../types'
 import Connection from './Connection'
@@ -56,17 +56,19 @@ export default function Helper(sock: AnyWASocket, store: Connection['store'], _w
 
       return fullMsg
     },
-    getName(jid: string, withoutContact = true) {
+    getName(id: string, withoutContact = true) {
       withoutContact &&= _withoutContact
-      let chat
-      let v = jid.endsWith('@g.us') ? (chat = store.chats.get(jid) || {}) && chat.metadata || {} : jid === '0@s.whatsapp.net' ? {
-        jid,
-        vname: 'WhatsApp'
-      } : jid === sock.authState.creds.me!.id ?
+      let chat: Chat
+      let v: Contact | Chat | {
+        vname?: string
+      } = id.endsWith('@g.us') ? (chat = store.chats.get(id)) || { id } : id === '0@s.whatsapp.net' ? {
+        id,
+        vname: 'WhatsApp',
+        notify: 'WhatsApp'
+      } : id === sock.authState.creds.me!.id ?
         sock.authState.creds.me :
-        store.contacts[jid] || {}
-      return (withoutContact && !jid.endsWith('@g.us') ? '' : v.name) || v.subject || v.vname || v.notify || parsePhoneNumber('+' + jid.replace('@s.whatsapp.net', '')).getNumber('international')
-
+        store.contacts[id] || {}
+      return (withoutContact && !id.endsWith('@g.us') ? '' : 'name' in v && v.name) || ('vname' in v && v.vname) || ('notify' in v && v.notify) || parsePhoneNumber('+' + id.replace(/(:.+)?@s\.whatsapp\.net/, '')).getNumber('international')
     }
   }
 }

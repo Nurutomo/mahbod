@@ -1,12 +1,13 @@
-import makeWASocket, { DisconnectReason, makeInMemoryStore, useSingleFileAuthState } from '@adiwajshing/baileys'
+import makeWASocket, { DisconnectReason, makeInMemoryStore, useMultiFileAuthState } from '@adiwajshing/baileys'
 import { Message } from '../listeners'
 import { join } from 'path'
 import pino from 'pino'
-import { AnyWASocket } from '../types'
-import { existsSync, mkdirSync, PathLike, readFileSync, unlinkSync } from 'fs'
+import { existsSync, mkdirSync, PathLike, readFileSync, rmSync, unlinkSync } from 'fs'
 import Helper from './Helper'
 import db from './Database'
 import { JSONFile } from '@commonify/lowdb'
+import Print from './Print'
+import PermissionHandler from './PermissionHandler'
 
 const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true } })
 export default class Connection {
@@ -19,9 +20,12 @@ export default class Connection {
     storeFolder: PathLike
     hosts: string[] = []
     owners: string[] = []
+    print: typeof Print
+    permissionHandler = PermissionHandler(_jid => '')
 
-    constructor(name: string = 'session') {
+    constructor(name: string = 'creds', print = Print) {
         this.name = name
+        this.print = print
         
         this.storeFolder = Connection.isModule ? './database' : join(__dirname, '../../database')
         if (!existsSync(this.storeFolder)) mkdirSync(this.storeFolder, { recursive: true })
@@ -41,20 +45,20 @@ export default class Connection {
 
 
 
-    start() {
+    async start() {
         const sessionFolder = Connection.isModule ? './sessions' : join(__dirname, '../../sessions')
         if (!existsSync(sessionFolder)) mkdirSync(sessionFolder, { recursive: true })
-        const sessionPath = join(sessionFolder, `${this.name}.json`)
+        const sessionFolderPath = join(sessionFolder, this.name)
+        const sessionPath = join(sessionFolderPath, 'creds.json')
         try {
             if (existsSync(sessionPath)) JSON.parse(readFileSync(sessionPath, 'utf8'))
         } catch (e) {
             console.error('Session data isn\'t valid')
             console.error(e)
-            unlinkSync(sessionPath)
+            rmSync(sessionFolderPath, { recursive: true, force: true })
         }
-        const { state, saveState } = useSingleFileAuthState(sessionPath)
+        const { state, saveCreds } = await useMultiFileAuthState(sessionFolderPath)
 
-        let self = this
         let store = this.store
         let sock = this.sock = makeWASocket({
             // can provide additional config here
@@ -63,15 +67,15 @@ export default class Connection {
             printQRInTerminal: true,
 
             getMessage(key) {
-                return store.loadMessage(key.remoteJid, key.id, sock).then(m => m.message)
+                return store.loadMessage(key.remoteJid, key.id).then(m => m.message)
             }
         }) as ReturnType<typeof Helper>
 
-        sock = this.sock = Helper(this.sock, this.store)
+        sock = this.sock = Helper(this.sock, this.store, false)
 
         this.store.bind(this.sock.ev)
 
-        this.sock.ev.on('connection.update', (update) => {
+        this.sock.ev.on('connection.update', update => {
             const { connection, lastDisconnect } = update
             if (connection === 'close') {
                 // @ts-ignore
@@ -90,6 +94,6 @@ export default class Connection {
             Message.onMessage(this, m)
         })
 
-        this.sock.ev.on('creds.update', saveState)
+        this.sock.ev.on('creds.update', saveCreds)
     }
 }

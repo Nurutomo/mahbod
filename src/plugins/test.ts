@@ -1,4 +1,4 @@
-import { onCommand } from "../types"
+import { onCommand } from '../types'
 
 export default class test {
     command = 'test'

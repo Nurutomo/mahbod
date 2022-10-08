@@ -1,8 +1,8 @@
-import Connection from "./Connection"
+import Connection from './Connection'
 import urlRegex from 'url-regex'
 import chalk from 'chalk'
 import { parsePhoneNumber } from 'awesome-phonenumber'
-import { ParsedMessage } from "../types"
+import { ParsedMessage } from '../types'
 
 let url_regex = urlRegex({ strict: false })
 export default async function Print(m: ParsedMessage, { sock, store }: Connection) {

@@ -1,6 +1,9 @@
-import { makeInMemoryStore, WAMessage, WAProto, getDevice, downloadMediaMessage, AnyMessageContent, MiscMessageGenerationOptions } from "@adiwajshing/baileys";
-import makeLegacySocket from "@adiwajshing/baileys/lib/LegacySocket";
-import makeMDSocket from "@adiwajshing/baileys/lib/Socket";
+import { makeInMemoryStore, WAMessage, WAProto, getDevice, downloadMediaMessage, AnyMessageContent, MiscMessageGenerationOptions } from '@adiwajshing/baileys'
+
+import makeMDSocket from '@adiwajshing/baileys/lib/Socket'
+import Connection from '../util/Connection'
+
+export * from './TypedEventEmitter'
 
 export type CreateFunction<T extends any[], R> = (...arg: T) => R
 export type ExcludeFromTuple<T extends readonly any[], E> =
@@ -16,9 +19,7 @@ type BAC<T extends any[]> = [First<Tail<T>>, First<T>, ...Tail<Tail<T>>]
 
 export type MessageTypes = keyof WAProto.IMessage
 export type AnyWASocket = ReturnType<typeof makeMDSocket>
-export type LegacyWASocket = ReturnType<typeof makeLegacySocket>
-export type WASocket = AnyWASocket | LegacyWASocket
-export type Permissions = 'host' | 'owner' | 'group' | 'private' | 'admin' | 'bot_admin'
+export type Permissions = '' | 'host' | 'owner' | 'group' | 'private' | 'admin' | 'bot_admin'
 
 export interface onCommand {
     m?: ParsedMessage
@@ -28,6 +29,7 @@ export interface onCommand {
     _args?: string[]
     store?: ReturnType<typeof makeInMemoryStore>
     command?: string
+    conn?: Connection
 }
 
 export interface ParsedMessage {
@@ -46,7 +48,7 @@ export interface ParsedMessage {
     timestamp: Date
     getQuotedObj?: () => ReturnType<ParserOptions['loadMessage']>
     getQuotedMessage?: () => ReturnType<ParserOptions['loadMessage']>
-    reply?: (content: AnyMessageContent, jid?: string, options?: MiscMessageGenerationOptions) => ReturnType<ParserOptions['sendMessage']>
+    reply?: (content: string | AnyMessageContent, jid?: string, options?: MiscMessageGenerationOptions) => ReturnType<ParserOptions['sendMessage']>
     download?: CreateFunction<Partial<Tail<Parameters<typeof downloadMediaMessage>>>, ReturnType<typeof downloadMediaMessage>>
     isCommand?: Boolean | Error
 }

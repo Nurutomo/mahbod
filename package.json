@@ -30,7 +30,7 @@
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@adiwajshing/baileys": "github:adiwajshing/Baileys",
+    "@adiwajshing/baileys": "github:adiwajshing/baileys",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@commonify/lowdb": "^3.0.0",
     "awesome-phonenumber": "^3.4.0",
