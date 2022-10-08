@@ -3,6 +3,7 @@ import MessageParser from '../util/MessageParser'
 import type Connection from '../util/Connection'
 import Plugins from '../util/PluginManager'
 import { onCommand } from '../types'
+import util from 'util'
 
 export default class Message {
     public static async onMessage(conn: Connection, _m: {
@@ -78,7 +79,10 @@ export default class Message {
                 }
             }
 
-            if (_err) console.error(_err)
+            if (_err) {
+                console.error(_err)
+                m.reply(util.format(_err))
+            }
         } catch (e) {
 
         } finally {
