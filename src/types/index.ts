@@ -1,4 +1,4 @@
-import { makeInMemoryStore, WAMessage, WAProto, getDevice, downloadMediaMessage, AnyMessageContent, MiscMessageGenerationOptions } from '@adiwajshing/baileys'
+import { makeInMemoryStore, WAMessage, WAProto, getDevice, downloadMediaMessage, AnyMessageContent, MiscMessageGenerationOptions, GroupMetadata, GroupMetadataParticipants, GroupParticipant, MessageUpsertType } from '@adiwajshing/baileys'
 
 import makeMDSocket from '@adiwajshing/baileys/lib/Socket'
 import Connection from '../util/Connection'
@@ -23,13 +23,23 @@ export type Permissions = '' | 'host' | 'owner' | 'group' | 'private' | 'admin' 
 
 export interface onCommand {
     m?: ParsedMessage
+    _m?: {
+        messages: WAMessage[],
+        type: MessageUpsertType
+    }
     sock?: AnyWASocket
     text?: string
     args?: string[]
     _args?: string[]
     store?: ReturnType<typeof makeInMemoryStore>
     command?: string
-    conn?: Connection
+    conn?: Connection,
+    groupMetadata: GroupMetadata,
+    participants: GroupParticipant[]
+    isAdmin: boolean
+    isBotAdmin: boolean
+    isOwner: boolean
+    isHost: boolean
 }
 
 export interface ParsedMessage {
