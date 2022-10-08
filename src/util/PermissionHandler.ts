@@ -19,7 +19,7 @@ const PermissionHandler = (getUserPermission: (userJid: string) => Permissions) 
     let cperm = getUserPermission(m.sender)
     let isOther = Perm.includes(cperm)
 
-    console.log({ isAdmin, isBotAdmin, isGroup, isPrivate, isOwner, isHost, Perm, me })
+    // console.log({ isAdmin, isBotAdmin, isGroup, isPrivate, isOwner, isHost, Perm, me })
     let permFail = []
     if (!isGroup && Perm.includes('group')) permFail.push('group')
     if (!isPrivate && Perm.includes('private')) permFail.push('private')
