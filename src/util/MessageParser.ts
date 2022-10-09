@@ -1,5 +1,6 @@
 import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto, areJidsSameUser, isJidGroup } from '@adiwajshing/baileys'
 import { ParsedMessage, ParserOptions, AnyWASocket } from '../types'
+import Connection from './Connection'
 
 function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
     const {
@@ -74,7 +75,10 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
                             })
                         }
                         parsed.quoted.download = (type = 'buffer', options) => {
-                            return downloadMediaMessage(parsed.quoted.fakeObj, type, options)
+                            return downloadMediaMessage(parsed.quoted.fakeObj, type, options, {
+                                logger: Connection.Logger.child({ class: 'Download' }),
+                                reuploadRequest: conn.updateMediaMessage
+                            })
                         }
                     }
                 }
@@ -95,7 +99,10 @@ function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions =
         })
     }
     parsed.download = (type = 'buffer', options) => {
-        return downloadMediaMessage(m, type, options)
+        return downloadMediaMessage(m, type, options, {
+            logger: Connection.Logger.child({ class: 'Download' }),
+            reuploadRequest: conn.updateMediaMessage
+        })
     }
     return parsed
 }

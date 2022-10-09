@@ -12,6 +12,7 @@ import PermissionHandler from './PermissionHandler'
 const Logger = pino({ transport: { target: 'pino-pretty' }, prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true } })
 export default class Connection {
     static isModule: boolean = true
+    static Logger = Logger
     
     sock: ReturnType<typeof Helper>
     store: ReturnType<typeof makeInMemoryStore>
