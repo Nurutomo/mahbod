@@ -1,15 +1,14 @@
-import { AnyMessageContent, Chat, Contact, generateWAMessageFromContent, MessageType, MiscMessageGenerationOptions, normalizeMessageContent, WAProto } from '@adiwajshing/baileys'
+import { AnyMessageContent, Chat, Contact, generateWAMessageFromContent, MessageType, MiscMessageGenerationOptions, normalizeMessageContent, WAProto, WASocket } from '@adiwajshing/baileys'
 import { parsePhoneNumber } from 'awesome-phonenumber'
-import { AnyWASocket } from '../types'
 import Connection from './Connection'
 
-interface Helper extends AnyWASocket {
-  reply: (jid: string, msg: AnyMessageContent, quoted: WAProto.WebMessageInfo, options?: MiscMessageGenerationOptions) => ReturnType<AnyWASocket['sendMessage']>
+interface Helper extends WASocket {
+  reply: (jid: string, msg: AnyMessageContent, quoted: WAProto.WebMessageInfo, options?: MiscMessageGenerationOptions) => ReturnType<WASocket['sendMessage']>
   forwardCopy: (jid: string, message: WAProto.IWebMessageInfo, forceForward: Boolean, options: MiscMessageGenerationOptions) => Promise<WAProto.WebMessageInfo>
   getName: (jid: string) => string
 }
 
-export default function Helper(sock: AnyWASocket, store: Connection['store'], _withoutContact = true): Helper {
+export default function Helper(sock: WASocket, store: Connection['store'], _withoutContact = true): Helper {
   return {
     ...sock,
     reply(jid: string, msg: AnyMessageContent, quoted: WAProto.WebMessageInfo, options?: MiscMessageGenerationOptions) {
@@ -68,7 +67,7 @@ export default function Helper(sock: AnyWASocket, store: Connection['store'], _w
       } : id === sock.authState.creds.me!.id ?
         sock.authState.creds.me :
         store.contacts[id] || {}
-      return (withoutContact && !id.endsWith('@g.us') ? '' : 'name' in v && v.name) || ('vname' in v && v.vname) || ('notify' in v && v.notify) || parsePhoneNumber('+' + id.replace(/(:.+)?@s\.whatsapp\.net/, '')).getNumber('international')
+      return (withoutContact && !id.endsWith('@g.us') ? '' : 'name' in v && v.name) || ('vname' in v && v.vname) || ('notify' in v && v.notify) || parsePhoneNumber('+' + id.replace(/(:.+)?@s\.whatsapp\.net/, '')).number.international
     }
   }
 }

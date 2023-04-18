@@ -27,7 +27,7 @@ export default class Message {
             let isBotAdmin = m.isGroup ? participants.find(({ id }) => id.split('@')[0].split(':')[0] == me.split('@')[0].split(':')[0]).admin?.includes('admin') : false
 
             let isOwner = [me, ...conn.owners].map(id => id.split('@')[0].split(':')[0]).findIndex(id => id === m.sender.split('@')[0].split(':')[0]) > -1
-            let isHost = conn.hosts.map(id => id.split('@')[0].split(':')[0]).findIndex(id => id === m.sender.split('@')[0].split(':')[0]) > -1
+            let isDeveloper = conn.developers.map(id => id.split('@')[0].split(':')[0]).findIndex(id => id === m.sender.split('@')[0].split(':')[0]) > -1
 
 
             let [command, ...args] = m.text.trim().split(' ').filter(v => v)
@@ -54,7 +54,7 @@ export default class Message {
                                 false
 
                     if (!isCommand || m.sentSource.endsWith('baileys')) continue
-                    if (!(await conn.permissionHandler(conn, { m, groupMetadata, isAdmin, isBotAdmin, isOwner, isHost }, plugin.permissions, name => m.reply({ text: `_Anda tidak memiliki izin untuk menggunakan fitur_ *${name.join()}*` })))) continue
+                    if (!(await conn.permissionHandler(conn, { m, groupMetadata, isAdmin, isBotAdmin, isOwner, isDeveloper }, plugin.permissions, name => m.reply({ text: `_Anda tidak memiliki izin untuk menggunakan fitur_ *${name.join()}*` })))) continue
 
                     await plugin.onCommand({
                         m,
@@ -71,7 +71,7 @@ export default class Message {
                         isAdmin,
                         isBotAdmin,
                         isOwner,
-                        isHost
+                        isDeveloper
                     } as onCommand)
                     m.isCommand = true
                 } catch (e) {

@@ -7,7 +7,8 @@ import { ParsedMessage } from '../types'
 let url_regex = urlRegex({ strict: false })
 export default async function Print(m: ParsedMessage, { sock, store }: Connection) {
   let _name = sock.getName(m.sender)
-  let sender = formatJidNumber(m.sender) + (_name ? ' ~' + _name : '')
+  let sender = formatJidNumber(m.sender)
+  if (_name && _name !== sender) sender += ' ~' + _name
   let chat = sock.getName(m.chat)
   // let ansi = '\x1b['
   let filesize = m.msg && typeof m.msg === 'object' ?
@@ -19,7 +20,6 @@ export default async function Print(m: ParsedMessage, { sock, store }: Connectio
           m.text.length :
           0
     : m.text ? m.text.length : 0
-  let user = {}
   let me = formatJidNumber(sock.authState.creds.me!.id)
   console.log(`
 ${chalk.redBright('%s')} ${chalk.black(chalk.bgYellow('%s'))} ${chalk.black(chalk.bgGreen('%s'))} ${chalk.magenta('%s [%s %sB]')}
@@ -85,7 +85,7 @@ ${chalk.green('%s')} ${chalk.yellow('%s%s')} ${chalk.blueBright('to')} ${chalk.g
 }
 
 function formatJidNumber(jid: string) {
-  return parsePhoneNumber('+' + getNumber(jid)).getNumber('international')
+  return parsePhoneNumber('+' + getNumber(jid)).number.international
 }
 
 function getNumber(jid: string) {

@@ -1,6 +1,5 @@
-import { makeInMemoryStore, WAMessage, WAProto, getDevice, downloadMediaMessage, AnyMessageContent, MiscMessageGenerationOptions, GroupMetadata, GroupMetadataParticipants, GroupParticipant, MessageUpsertType } from '@adiwajshing/baileys'
+import { makeInMemoryStore, WAMessage, WAProto, getDevice, downloadMediaMessage, AnyMessageContent, MiscMessageGenerationOptions, GroupMetadata, GroupParticipant, MessageUpsertType, WASocket } from '@adiwajshing/baileys'
 
-import makeMDSocket from '@adiwajshing/baileys/lib/Socket'
 import Connection from '../util/Connection'
 
 export * from './TypedEventEmitter'
@@ -18,16 +17,15 @@ export type Tail<T extends any[]> = T extends [infer _I, ...infer L] ? L : never
 type BAC<T extends any[]> = [First<Tail<T>>, First<T>, ...Tail<Tail<T>>]
 
 export type MessageTypes = keyof WAProto.IMessage
-export type AnyWASocket = ReturnType<typeof makeMDSocket>
-export type Permissions = '' | 'host' | 'owner' | 'group' | 'private' | 'admin' | 'bot_admin'
+export type Permissions = 'developer' | 'owner' | 'group' | 'private' | 'admin' | 'bot_admin'
 
-export interface onCommand {
+export declare interface onCommand {
     m?: ParsedMessage
     _m?: {
         messages: WAMessage[],
         type: MessageUpsertType
     }
-    sock?: AnyWASocket
+    sock?: WASocket
     text?: string
     args?: string[]
     _args?: string[]
@@ -39,7 +37,7 @@ export interface onCommand {
     isAdmin: boolean
     isBotAdmin: boolean
     isOwner: boolean
-    isHost: boolean
+    isDeveloper: boolean
 }
 
 export interface ParsedMessage {
@@ -68,7 +66,7 @@ export interface ParsedQuotedMessage extends Omit<ParsedMessage, 'm' | 'quoted' 
     fakeObj?: WAMessage
 }
 
-export interface ParserOptions {
+export declare interface ParserOptions {
     loadMessage?: (jid: string, id: string) => Promise<WAProto.IWebMessageInfo> | null
-    sendMessage?: AnyWASocket['sendMessage']
+    sendMessage?: WASocket['sendMessage']
 }

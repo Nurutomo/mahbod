@@ -1,8 +1,8 @@
-import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto, areJidsSameUser, isJidGroup } from '@adiwajshing/baileys'
-import { ParsedMessage, ParserOptions, AnyWASocket } from '../types'
+import { downloadMediaMessage, extractMessageContent, getContentType, getDevice, WAMessage, WAProto, areJidsSameUser, isJidGroup, WASocket } from '@adiwajshing/baileys'
+import { ParsedMessage, ParserOptions } from '../types'
 import Connection from './Connection'
 
-function MessageParser(conn: AnyWASocket, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
+function MessageParser(conn: WASocket, m: WAMessage, options: ParserOptions = {}): ParsedMessage {
     const {
         loadMessage,
         sendMessage

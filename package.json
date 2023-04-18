@@ -33,9 +33,9 @@
     "@adiwajshing/baileys": "github:adiwajshing/baileys",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@commonify/lowdb": "^3.0.0",
-    "awesome-phonenumber": "^3.4.0",
+    "awesome-phonenumber": "^5.4.0",
     "chalk": "^4.1.2",
-    "link-preview-js": "^2.1.13",
+    "link-preview-js": "^3.0.4",
     "mongoose": "^6.3.3",
     "node-fetch": "^2.6.7",
     "pino": "^7.11.0",
@@ -44,17 +44,17 @@
     "steno": "^2.1.0",
     "url-regex": "^5.0.0"
   },
-  "devDependencies": {
-    "@types/node": "^16.4.2",
-    "@types/node-fetch": "^2.6.1",
-    "@types/ws": "^8.5.3",
-    "typedoc": "^0.22.15",
-    "typescript": "^4.6.4"
-  },
   "files": [
     "database/*",
     "lib/*",
     "lang/*",
     "sessions/*"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "@types/node-fetch": "^2.6.3",
+    "@types/ws": "^8.5.4",
+    "typedoc": "^0.24.4",
+    "typescript": "^5.0.4"
+  }
 }

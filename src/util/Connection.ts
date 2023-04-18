@@ -19,10 +19,10 @@ export default class Connection {
     storePath: PathLike
     name: string
     storeFolder: PathLike
-    hosts: string[] = []
+    developers: string[] = []
     owners: string[] = []
     print: typeof Print
-    permissionHandler = PermissionHandler(_jid => '')
+    permissionHandler = PermissionHandler()
 
     constructor(name: string = 'creds', print = Print) {
         this.name = name

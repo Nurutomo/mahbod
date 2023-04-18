@@ -8,7 +8,7 @@ export default class exec extends PluginClass {
     constructor () {
         super()
         this.command = ['>', '=>'] as PluginClass['command']
-        this.permissions = ['host', 'owner'] as PluginClass['permissions']
+        this.permissions = ['developer'] as PluginClass['permissions']
     }
 
     async onCommand({
