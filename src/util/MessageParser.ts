@@ -69,7 +69,7 @@ function MessageParser(conn: WASocket, m: WAMessage, options: ParserOptions = {}
                             ...(parsed.isGroup ? { participant: parsed.quoted.sender } : {})
                         } as WAMessage
                         parsed.quoted.reply = (content, jid = parsed.quoted.chat, options) => {
-                            return sendMessage(jid, typeof content === 'string' ? { text: content } : content, {
+                            return sendMessage(jid || parsed.quoted.chat, typeof content === 'string' ? { text: content } : content, {
                                 ...options,
                                 quoted: parsed.quoted.fakeObj
                             })
@@ -93,7 +93,7 @@ function MessageParser(conn: WASocket, m: WAMessage, options: ParserOptions = {}
     }
 
     parsed.reply = (content, jid = parsed.chat, options?) => {
-        return sendMessage(jid, typeof content === 'string' ? { text: content } : content, {
+        return sendMessage(jid || parsed.chat, typeof content === 'string' ? { text: content } : content, {
             ...options,
             quoted: m
         })
