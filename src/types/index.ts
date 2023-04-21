@@ -70,3 +70,16 @@ export declare interface ParserOptions {
     loadMessage?: (jid: string, id: string) => Promise<WAProto.IWebMessageInfo> | null
     sendMessage?: WASocket['sendMessage']
 }
+
+export const WABOT_AQ_PERMISSIONS = {
+    rowner: 'developer',
+    owner: 'owner',
+    mods: 'mods',
+    premium: 'premium',
+    group: 'group',
+    admin: 'admin',
+    botAdmin: 'bot_admin',
+    private: 'private',
+    register: 'register',
+    limit: 'limit'
+}

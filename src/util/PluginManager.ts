@@ -1,23 +1,27 @@
 import { join, resolve } from 'path'
 import { existsSync, FSWatcher, readdirSync, watch } from 'fs'
 import type { Logger } from 'pino'
-import { Permissions, TypedEventEmitter } from '../types'
+import { Permissions, TypedEventEmitter, WABOT_AQ_PERMISSIONS, onCommand } from '../types'
 
+type singleOrArray<T> = T | T[]
 type Callback = (error?: Error | Boolean, message?: any) => any
-type PluginValue = PluginClass
+type PluginValue = singleOrArray<PluginClass & Function>
+type PluginsValue = {
+    default: PluginValue
+} | PluginValue
 export class PluginManager extends TypedEventEmitter<{
-    'add': ({ name, plugin }: {
+    'add': ({ name, plugins }: {
         name: string,
-        plugin: PluginValue
+        plugins: PluginsValue[]
     }) => void
     'add.folder': ({ watcher, loaded, folder }: {
         watcher: FSWatcher
         loaded: Promise<ReturnType<PluginManager['addPlugin']>>
         folder: string
     }) => void
-    'delete': ({ name, plugin }: {
+    'delete': ({ name, plugins }: {
         name: string,
-        plugin: PluginValue
+        plugins: PluginsValue[]
     }) => void
     'delete.folder': ({ watcher, folder }: {
         watcher: FSWatcher
@@ -115,7 +119,7 @@ export class PluginManager extends TypedEventEmitter<{
             let fn = 'prototype' in source ? new source : source
             this.emit('add', {
                 name: this.fn_id.toString(),
-                plugin: fn
+                plugins: [fn]
             })
             this.plugins[this.fn_id++] = fn
             return typeof cb === 'function' ? cb(false, fn) : Promise.resolve(fn)
@@ -123,30 +127,63 @@ export class PluginManager extends TypedEventEmitter<{
             if (!this.filter.test(source)) return typeof cb === 'function' ? cb(true) : Promise.reject()
             let pathToFile = resolve(source)
             return Promise.resolve(import(source.replace('.js', '')))
-                .then(plugin => {
-                    let module = 'default' in plugin ? plugin.default : plugin
-                    return 'prototype' in module ? new module : module
-                })
-                .then(plugin => {
-                    this.plugins[pathToFile] = plugin
+                .then(this.processPlugins)
+                .then(plugins => {
+                    for (let i in plugins) {
+                        let plugin = plugins[i]
+                        this.plugins[`${pathToFile}_${plugins.length}_${i}`] = plugin
+                    }
                     this.emit('add', {
                         name: pathToFile,
-                        plugin
+                        plugins
                     })
-                    if (typeof cb === 'function') cb(false, plugin)
-                    return plugin
+                    if (typeof cb === 'function') cb(false, plugins)
+                    return plugins
                 })
         }
     }
 
     delPlugin(file: string) {
         let pathToFile = resolve(file)
+        let pluginNames = Object.keys(this.plugins).map(_name => {
+            let splitted = _name.split('_')
+            return {
+                name: splitted.pop(),
+                length: splitted.pop(),
+                id: splitted.join('_')
+            }
+        }).filter(({ name }) => name === file || name === pathToFile)
+        let plugins = pluginNames.map(({ name }) => this.plugins[name])
         this.emit('delete', {
             name: file,
-            plugin: this.plugins[file] || this.plugins[pathToFile]
+            plugins
         })
         delete this.plugins[file]
         delete this.plugins[pathToFile]
+    }
+    
+    processPlugins(plugins: PluginsValue) {
+        let modules = 'default' in plugins ? plugins.default : plugins
+        modules = Array.isArray(modules) ? modules : [modules]
+        return modules.map(module => {
+            // wabot-aq support
+            try {
+                // @ts-ignore
+                module = new module
+            } catch (e) {
+                // @ts-ignore
+                module.onCommand = async opts => {
+                    return await module(opts.m, opts)
+                }
+            }
+
+            let permissions = []
+            for (let key in module)
+                if (key in WABOT_AQ_PERMISSIONS && module[key])
+                    permissions.push(WABOT_AQ_PERMISSIONS[key])
+            module.permissions = permissions
+            return module
+        })
     }
 }
 
